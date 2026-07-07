@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="appTitle">Mühendislik Hesap Makinesi</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    
+    <!-- MathLive -->
+    <script src="https://unpkg.com/mathlive"></script>
+
+    <!-- App CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Nerdamer (Symbolic Calculus & Algebra) -->
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/nerdamer.core.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Algebra.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Calculus.js"></script>
+</head>
+<body>
+    <!-- Animated background orbs -->
+    <div class="bg-orb bg-orb--1"></div>
+    <div class="bg-orb bg-orb--2"></div>
+    <div class="bg-orb bg-orb--3"></div>
+
+    <div class="dashboard" id="dashboard-main">
+        <!-- ======== LEFT SIDEBAR ======== -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar__header">
+                <h1 class="sidebar__logo">⚙ <span data-i18n="logoText">MühendisCalc</span></h1>
+                <button class="sidebar__lang-btn" id="lang-toggle">TR / EN</button>
+            </div>
+
+            <ul class="sidebar__menu" id="sidebar-menu">
+                <li><button class="sidebar__item sidebar__item--active" data-tab="standard"><span class="sidebar__icon">🧮</span><span data-i18n="tabStandard">Standart & Bilimsel</span></button></li>
+                <li><button class="sidebar__item" data-tab="plot"><span class="sidebar__icon">📈</span><span data-i18n="tabPlot">Grafik Çizici (PLOT)</span></button></li>
+                <li><button class="sidebar__item" data-tab="matrix"><span class="sidebar__icon">▦</span><span data-i18n="tabMatrix">Matris (MATRIX)</span></button></li>
+                <li><button class="sidebar__item" data-tab="eqn"><span class="sidebar__icon">∑</span><span data-i18n="tabEqn">Denklem (EQN)</span></button></li>
+                <li><button class="sidebar__item" data-tab="cmplx"><span class="sidebar__icon">ℂ</span><span data-i18n="tabCmplx">Kompleks (CMPLX)</span></button></li>
+                <li><button class="sidebar__item" data-tab="conv"><span class="sidebar__icon">⇄</span><span data-i18n="tabConv">Birim Çevirici (CONV)</span></button></li>
+                <li><button class="sidebar__item" data-tab="macro"><span class="sidebar__icon">💾</span><span data-i18n="tabMacro">Makrolar (MACRO)</span></button></li>
+                <li><button class="sidebar__item" data-tab="toolkit"><span class="sidebar__icon">🧰</span><span data-i18n="tabToolkit">Araç Kiti (TOOLKIT)</span></button></li>
+                <li><button class="sidebar__item" data-tab="base"><span class="sidebar__icon">▪</span><span data-i18n="tabBase">Taban (BASE-N)</span></button></li>
+                <li><button class="sidebar__item" data-tab="const"><span class="sidebar__icon">π</span><span data-i18n="tabConst">Sabitler (CONST)</span></button></li>
+                <li><button class="sidebar__item" data-tab="bom"><span class="sidebar__icon">📦</span><span data-i18n="tabBOM">Proje Maliyeti (BOM)</span></button></li>
+            </ul>
+
+            <div class="sidebar__footer">
+                <small class="sidebar__version">v5.0 Premium Edition</small>
+                <div class="sidebar__brand">
+                    <span class="sidebar__brand-text">Developed by</span>
+                    <a href="https://www.youtube.com/@tuncaybykpnr" target="_blank" rel="noopener" class="sidebar__brand-name" style="text-decoration:none; transition:color 0.2s;">Tuncay Büyükbunar</a>
+                    <a href="https://instagram.com/" target="_blank" rel="noopener" class="sidebar__brand-link">TeducationTR</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Mobile hamburger toggle -->
+        <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+
+        <!-- ======== RIGHT WORKSPACE ======== -->
+        <main class="workspace" id="workspace">
+
+            <!-- ==================== STANDARD TAB ==================== -->
+            <section class="workspace__panel workspace__panel--active" id="panel-standard">
+                <div class="info-banner" data-i18n="infoStandard">Temel aritmetik, trigonometrik ve bilimsel işlemler. Ekrana direkt denklem yazabilirsiniz.</div>
+                <div class="calc-topbar">
+                    <button class="topbar-btn topbar-btn--mode" id="mode-toggle">DEG</button>
+                    <div class="topbar-nav">
+                        <button class="topbar-btn topbar-btn--nav" id="history-up" title="Önceki işlem">▲</button>
+                        <button class="topbar-btn topbar-btn--nav" id="history-down" title="Sonraki işlem">▼</button>
+                    </div>
+                </div>
+
+                <div class="display" id="display">
+                    <div class="display__expr-container">
+                        <math-field id="math-input" virtual-keyboard-mode="manual"></math-field>
+                    </div>
+                    <div class="display__result" id="result">0</div>
+                    <div class="display__actions">
+                        <button class="btn--code-export" id="code-export-btn" title="Koda Çevir">&#60;/&#62; Koda Çevir</button>
+                    </div>
+                </div>
+
+                <div class="calc-grids">
+                    <!-- Scientific grid -->
+                    <div class="btn-grid btn-grid--sci" id="sci-grid">
+                        <button class="btn btn--sci" data-action="sin">sin</button>
+                        <button class="btn btn--sci" data-action="cos">cos</button>
+                        <button class="btn btn--sci" data-action="tan">tan</button>
+                        <button class="btn btn--sci" data-action="log">log</button>
+                        <button class="btn btn--sci" data-action="ln">ln</button>
+
+                        <button class="btn btn--sci" data-action="asin">sin⁻¹</button>
+                        <button class="btn btn--sci" data-action="acos">cos⁻¹</button>
+                        <button class="btn btn--sci" data-action="atan">tan⁻¹</button>
+                        <button class="btn btn--sci" data-action="square">x²</button>
+                        <button class="btn btn--sci" data-action="power">xʸ</button>
+
+                        <button class="btn btn--sci" data-action="sqrt">√</button>
+                        <button class="btn btn--sci" data-action="fraction">⅟</button>
+                        <button class="btn btn--sci" data-action="abs">|x|</button>
+                        <button class="btn btn--sci" data-action="pow10">10ˣ</button>
+                        <button class="btn btn--sci" data-action="exp">eˣ</button>
+
+                        <button class="btn btn--sci" data-action="pi">π</button>
+                        <button class="btn btn--sci" data-action="euler">e</button>
+                        <button class="btn btn--sci" data-action="integral" style="grid-column: span 2; font-weight: bold;">∫ (İntegral)</button>
+                        <button class="btn btn--sci" data-action="sym_deriv_main" style="grid-column: span 2; font-weight: bold;">d/dx (Türev)</button>
+                        <button class="btn btn--sci" data-action="ans">ANS</button>
+                        <button class="btn btn--sci" data-action="negate">±</button>
+                        <button class="btn btn--sci" data-action="factorial">n!</button>
+                    </div>
+
+                    <!-- Numpad -->
+                    <div class="btn-grid btn-grid--main" id="main-grid">
+                        <button class="btn btn--op" data-action="open-paren">(</button>
+                        <button class="btn btn--op" data-action="close-paren">)</button>
+                        <button class="btn btn--op" data-action="backspace">⌫</button>
+                        <button class="btn btn--danger" data-action="clear">AC</button>
+
+                        <button class="btn btn--num" data-action="digit" data-value="7">7</button>
+                        <button class="btn btn--num" data-action="digit" data-value="8">8</button>
+                        <button class="btn btn--num" data-action="digit" data-value="9">9</button>
+                        <button class="btn btn--op" data-action="divide">÷</button>
+
+                        <button class="btn btn--num" data-action="digit" data-value="4">4</button>
+                        <button class="btn btn--num" data-action="digit" data-value="5">5</button>
+                        <button class="btn btn--num" data-action="digit" data-value="6">6</button>
+                        <button class="btn btn--op" data-action="multiply">×</button>
+
+                        <button class="btn btn--num" data-action="digit" data-value="1">1</button>
+                        <button class="btn btn--num" data-action="digit" data-value="2">2</button>
+                        <button class="btn btn--num" data-action="digit" data-value="3">3</button>
+                        <button class="btn btn--op" data-action="subtract">−</button>
+
+                        <button class="btn btn--num" data-action="digit" data-value="0">0</button>
+                        <button class="btn btn--num" data-action="decimal">.</button>
+                        <button class="btn btn--equals" data-action="evaluate">=</button>
+                        <button class="btn btn--op" data-action="add">+</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== PLOT TAB ==================== -->
+            <section class="workspace__panel" id="panel-plot">
+                <h2 class="panel-title" data-i18n="plotTitle">Grafik Çizici (2D)</h2>
+                <div class="info-banner" data-i18n="infoPlot">2D fonksiyon grafiklerini çizin. Yakınlaştırmak ve kaydırmak için farenizi kullanın.</div>
+                <div class="panel-card">
+                    <div class="panel-field">
+                        <label class="panel-label">f(x) =</label>
+                        <input type="text" class="panel-input" id="plot-func" placeholder="Örn: sin(x) * x" data-i18n-ph="plotPh">
+                    </div>
+                    <button class="btn--panel-action" id="plot-btn" data-i18n="plotBtn">Çiz (Plot)</button>
+                    
+                    <div id="plot-container" class="plot-container"></div>
+                    
+                    <div class="action-bar" style="margin-top: 16px;">
+                        <button class="btn--export btn--export-pdf" onclick="exportPanelToPDF('panel-plot', 'Grafik_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== MATRIX TAB ==================== -->
+            <section class="workspace__panel" id="panel-matrix">
+                <h2 class="panel-title" data-i18n="matrixTitle">Matris İşlemleri</h2>
+                <div class="info-banner" data-i18n="infoMatrix">Determinant, ters alma, transpoz ve temel matris aritmetiği hesaplamaları.</div>
+                <div class="panel-card">
+                    <div class="panel-field">
+                        <label class="panel-label" data-i18n="matrixSize">Matris Boyutu (NxN)</label>
+                        <input type="number" class="panel-input panel-input--narrow" id="matrix-size" value="3" min="1" max="10">
+                    </div>
+                    <div class="matrix-workspace">
+                        <div class="matrix-block">
+                            <label class="panel-label" data-i18n="matrixA">Matris A</label>
+                            <div class="matrix-grid-wrapper">
+                                <div class="matrix-grid" id="matrix-a-grid"></div>
+                            </div>
+                        </div>
+                        <div class="matrix-block">
+                            <label class="panel-label" data-i18n="matrixB">Matris B</label>
+                            <div class="matrix-grid-wrapper">
+                                <div class="matrix-grid" id="matrix-b-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="action-bar">
+                        <button class="btn--panel-action" data-mop="det">det(A)</button>
+                        <button class="btn--panel-action" data-mop="inv">A⁻¹</button>
+                        <button class="btn--panel-action" data-mop="trans">Aᵀ</button>
+                        <button class="btn--panel-action" data-mop="detB">det(B)</button>
+                        <button class="btn--panel-action" data-mop="invB">B⁻¹</button>
+                        <button class="btn--panel-action" data-mop="transB">Bᵀ</button>
+                        <button class="btn--panel-action" data-mop="add">A + B</button>
+                        <button class="btn--panel-action" data-mop="mul">A × B</button>
+                    </div>
+                    <div class="panel-result panel-result--matrix" id="matrix-result">—</div>
+                    
+                    <div class="action-bar" style="margin-top: 16px;">
+                        <button class="btn--export btn--export-pdf" onclick="exportPanelToPDF('panel-matrix', 'Matris_Raporu.pdf')">Raporu İndir (PDF)</button>
+                        <button class="btn--export btn--export-excel" id="matrix-excel">Excel İndir</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== EQUATION TAB ==================== -->
+            <section class="workspace__panel" id="panel-eqn">
+                <h2 class="panel-title" data-i18n="eqnTitle">Denklem Çözücü & Analiz</h2>
+                <div class="info-banner" data-i18n="infoEqn">Polinom kökleri bulma, lineer denklem sistemleri çözme ve sayısal integrasyon işlemleri.</div>
+                <div class="panel-card">
+                    <div class="eqn-controls">
+                        <div class="panel-field">
+                            <label class="panel-label" data-i18n="eqnType">Denklem / Analiz Tipi</label>
+                            <select class="panel-select" id="eqn-type">
+                                <option value="quad" data-i18n="eqnQuad">2. Derece (ax² + bx + c = 0)</option>
+                                <option value="cubic" data-i18n="eqnCubic">3. Derece (ax³ + bx² + cx + d = 0)</option>
+                                <option value="poly">N-Derece Polinom (Durand-Kerner)</option>
+                                <option value="linear" data-i18n="eqnLinear">Doğrusal Sistem (N Bilinmeyenli)</option>
+                                <option value="integral" data-i18n="eqnIntegral">Belirli İntegral (∫f(x)dx)</option>
+                                <option value="sym_integral">Belirsiz İntegral (Sembolik)</option>
+                                <option value="derivative" data-i18n="eqnDeriv">Sayısal Türev (f'(x₀))</option>
+                                <option value="sym_deriv">Sembolik Türev</option>
+                            </select>
+                        </div>
+                        <div class="panel-field" id="eqn-poly-degree-container" style="display:none; margin-top:12px;">
+                            <label class="panel-label">Polinom Derecesi (2-10)</label>
+                            <input type="number" class="panel-input panel-input--narrow" id="eqn-poly-degree" value="4" min="2" max="10">
+                        </div>
+                        <div class="panel-field" id="eqn-linear-size-container" style="display:none;">
+                            <label class="panel-label" data-i18n="eqnUnk">Bilinmeyen Sayısı (2-10)</label>
+                            <input type="number" class="panel-input panel-input--narrow" id="eqn-linear-size" value="3" min="2" max="10">
+                        </div>
+                    </div>
+                    <div class="eqn-inputs" id="eqn-inputs"></div>
+                    
+                    <div class="action-bar action-bar--eqn">
+                        <button class="btn--panel-action" id="eqn-solve" data-i18n="eqnSolveBtn">Çöz / Hesapla</button>
+                    </div>
+
+                    <div class="panel-result panel-result--matrix" id="eqn-result">—</div>
+
+                    <div class="action-bar" style="margin-top: 16px;">
+                        <button class="btn--export btn--export-pdf" onclick="exportPanelToPDF('panel-eqn', 'Denklem_Raporu.pdf')">Raporu İndir (PDF)</button>
+                        <button class="btn--export btn--export-excel" id="eqn-excel">Excel İndir</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== MACRO TAB ==================== -->
+            <section class="workspace__panel" id="panel-macro">
+                <h2 class="panel-title" data-i18n="macroTitle">Özel Formül Hafızası (MACRO)</h2>
+                <div class="info-banner" data-i18n="infoMacro">Sık kullandığınız karmaşık formülleri değişkenleriyle kaydedip tekrar tekrar hızlıca hesaplayın.</div>
+                <div class="panel-card macro-layout">
+                    <!-- Left: Create Macro -->
+                    <div class="macro-create">
+                        <h3 class="panel-subtitle">Yeni Makro Kaydet</h3>
+                        <div class="panel-field">
+                            <label class="panel-label">Makro Adı</label>
+                            <input type="text" class="panel-input" id="macro-name" placeholder="Örn: Gerilim Bölücü">
+                        </div>
+                        <div class="panel-field">
+                            <label class="panel-label">Formül (Değişkenler: a, b, c, vs.)</label>
+                            <input type="text" class="panel-input" id="macro-formula" placeholder="Örn: (v * r2) / (r1 + r2)">
+                        </div>
+                        <button class="btn--panel-action btn--panel-action--wide" id="macro-save">Kaydet</button>
+                        
+                        <h3 class="panel-subtitle" style="margin-top:24px;">Kayıtlı Makrolar</h3>
+                        <div class="macro-list" id="macro-list"></div>
+                    </div>
+                    <!-- Right: Execute Macro -->
+                    <div class="macro-execute">
+                        <h3 class="panel-subtitle" id="macro-exec-title">Makro Çalıştır</h3>
+                        <div class="macro-vars" id="macro-vars">
+                            <p class="const-hint">Listeden bir makro seçin.</p>
+                        </div>
+                        <button class="btn--panel-action btn--panel-action--wide" id="macro-run" style="display:none;">Hesapla</button>
+                        <div class="panel-result" id="macro-result">—</div>
+                        <button class="btn--export btn--export-pdf" style="margin-top:16px;" onclick="exportPanelToPDF('panel-macro', 'Makro_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== TOOLKIT TAB ==================== -->
+            <section class="workspace__panel" id="panel-toolkit">
+                <h2 class="panel-title" data-i18n="toolkitTitle">Mühendislik Araç Kiti (TOOLKIT)</h2>
+                <div class="info-banner" data-i18n="infoToolkit">Elektrik ve mekanik tasarım için hazır sektörel şablon hesaplayıcılar. Her modülün PDF'ini alabilirsiniz.</div>
+                <div class="toolkit-grid">
+                    <div class="panel-card toolkit-card" id="toolkit-resistor">
+                        <h3 class="toolkit-card__title">Direnç Renk Kodu Okuyucu</h3>
+                        <div class="panel-field"><select class="panel-select" id="res-bands"><option value="4">4 Bantlı</option><option value="5">5 Bantlı</option></select></div>
+                        <div class="resistor-bands" id="resistor-inputs"></div>
+                        <button class="btn--panel-action btn--panel-action--wide" id="res-calc">Hesapla</button>
+                        <div class="panel-result" id="res-result">—</div>
+                        <button class="btn--export btn--export-pdf" style="margin-top:auto;" onclick="exportPanelToPDF('toolkit-resistor', 'Direnc_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+                    <div class="panel-card toolkit-card" id="toolkit-opamp">
+                        <h3 class="toolkit-card__title">Op-Amp Kazanç Hesabı</h3>
+                        <div class="panel-field"><select class="panel-select" id="opamp-type"><option value="inv">Inverting (Eviren)</option><option value="noninv">Non-Inverting (Evirmeyen)</option></select></div>
+                        <div class="panel-field"><label class="panel-label">R_in (Ω)</label><input type="number" class="panel-input" id="opamp-rin" value="1000"></div>
+                        <div class="panel-field"><label class="panel-label">R_f (Ω)</label><input type="number" class="panel-input" id="opamp-rf" value="10000"></div>
+                        <button class="btn--panel-action btn--panel-action--wide" id="opamp-calc">Hesapla</button>
+                        <div class="panel-result" id="opamp-result">—</div>
+                        <button class="btn--export btn--export-pdf" style="margin-top:auto;" onclick="exportPanelToPDF('toolkit-opamp', 'OpAmp_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+                    <div class="panel-card toolkit-card" id="toolkit-gear">
+                        <h3 class="toolkit-card__title">Dişli Oranı (Gear Ratio)</h3>
+                        <div class="panel-field"><label class="panel-label">Motor (Driver) Diş Sayısı</label><input type="number" class="panel-input" id="gear-driver" value="12"></div>
+                        <div class="panel-field"><label class="panel-label">Tekerlek (Driven) Diş Sayısı</label><input type="number" class="panel-input" id="gear-driven" value="36"></div>
+                        <button class="btn--panel-action btn--panel-action--wide" id="gear-calc">Hesapla</button>
+                        <div class="panel-result" id="gear-result">—</div>
+                        <button class="btn--export btn--export-pdf" style="margin-top:auto;" onclick="exportPanelToPDF('toolkit-gear', 'Disli_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+                    <!-- Kablo Kesit ve Gerilim Düşümü -->
+                    <div class="panel-card toolkit-card" id="toolkit-vdrop">
+                        <h3 class="toolkit-card__title">Kablo Kesit ve Gerilim Düşümü</h3>
+                        <div class="panel-field">
+                            <label class="panel-label">Sistem Tipi</label>
+                            <select class="panel-select" id="vdrop-sys">
+                                <option value="mono">Tek Faz (Monofaze)</option>
+                                <option value="tri">Üç Faz (Trifaze)</option>
+                            </select>
+                        </div>
+                        <div class="panel-field">
+                            <label class="panel-label">İletken Tipi</label>
+                            <select class="panel-select" id="vdrop-cond">
+                                <option value="cu">Bakır (Cu)</option>
+                                <option value="al">Alüminyum (Al)</option>
+                            </select>
+                        </div>
+                        <div class="panel-field"><label class="panel-label">Kaynak Gerilimi (V)</label><input type="number" class="panel-input" id="vdrop-volt" value="220"></div>
+                        <div class="panel-field"><label class="panel-label">Hat Uzunluğu (m)</label><input type="number" class="panel-input" id="vdrop-len" value="50"></div>
+                        <div class="panel-field"><label class="panel-label">Akım (A)</label><input type="number" class="panel-input" id="vdrop-amp" value="10"></div>
+                        <div class="panel-field"><label class="panel-label">İletken Kesiti (mm²)</label><input type="number" class="panel-input" id="vdrop-sec" value="2.5"></div>
+                        <button class="btn--panel-action btn--panel-action--wide" id="vdrop-calc">Hesapla</button>
+                        <div class="panel-result" id="vdrop-result">—</div>
+                        <button class="btn--export btn--export-pdf" style="margin-top:auto;" onclick="exportPanelToPDF('toolkit-vdrop', 'Gerilim_Dusumu_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+                    <!-- Yeni Araçlar -->
+                    <div class="panel-card toolkit-card" id="toolkit-vdiv">
+                        <h3 class="toolkit-card__title">Gerilim Bölücü (Voltage Divider)</h3>
+                        <div class="panel-field"><label class="panel-label">Giriş Gerilimi (V_in)</label><input type="number" class="panel-input" id="vd-vin" value="5"></div>
+                        <div class="panel-field"><label class="panel-label">Direnç R1 (Ω)</label><input type="number" class="panel-input" id="vd-r1" value="1000"></div>
+                        <div class="panel-field"><label class="panel-label">Direnç R2 (Ω)</label><input type="number" class="panel-input" id="vd-r2" value="2000"></div>
+                        <button class="btn--panel-action btn--panel-action--wide" id="vd-calc">Hesapla</button>
+                        <div class="panel-result" id="vd-result">—</div>
+                        <button class="btn--export btn--export-pdf" style="margin-top:auto;" onclick="exportPanelToPDF('toolkit-vdiv', 'Gerilim_Bolucu_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+                    <div class="panel-card toolkit-card" id="toolkit-motor">
+                        <h3 class="toolkit-card__title">Motor Güç/Tork Hesabı</h3>
+                        <div class="panel-field"><label class="panel-label">Tork (N·m)</label><input type="number" class="panel-input" id="motor-torque" value="10"></div>
+                        <div class="panel-field"><label class="panel-label">Devir (RPM)</label><input type="number" class="panel-input" id="motor-rpm" value="1500"></div>
+                        <button class="btn--panel-action btn--panel-action--wide" id="motor-calc">Hesapla</button>
+                        <div class="panel-result" id="motor-result">—</div>
+                        <button class="btn--export btn--export-pdf" style="margin-top:auto;" onclick="exportPanelToPDF('toolkit-motor', 'Motor_Guc_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+                    <div class="panel-card toolkit-card" id="toolkit-led">
+                        <h3 class="toolkit-card__title">LED Seri Direnç Hesabı</h3>
+                        <div class="panel-field"><label class="panel-label">Kaynak Voltajı (V_s)</label><input type="number" class="panel-input" id="led-vs" value="12"></div>
+                        <div class="panel-field"><label class="panel-label">LED İleri Voltajı (V_f)</label><input type="number" class="panel-input" id="led-vf" value="3.3"></div>
+                        <div class="panel-field"><label class="panel-label">LED Akımı (mA)</label><input type="number" class="panel-input" id="led-if" value="20"></div>
+                        <button class="btn--panel-action btn--panel-action--wide" id="led-calc">Hesapla</button>
+                        <div class="panel-result" id="led-result">—</div>
+                        <button class="btn--export btn--export-pdf" style="margin-top:auto;" onclick="exportPanelToPDF('toolkit-led', 'LED_Direnc_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+
+                    <!-- Digital Logic Analyzer Card -->
+                    <div class="panel-card toolkit-card" id="toolkit-logic">
+                        <h3 class="toolkit-card__title">&#9035; Dijital Lojik Analizi</h3>
+                        <div class="panel-field">
+                            <label class="panel-label">Lojik Denklem (AND, OR, NOT, XOR, NAND, NOR)</label>
+                            <input type="text" class="panel-input" id="logic-expr" placeholder="Örn: (A AND B) OR NOT C" style="font-family: monospace;">
+                        </div>
+                        <button class="btn--panel-action btn--panel-action--wide" id="logic-calc">Doğruluk Tablosu Oluştur</button>
+                        <div id="logic-result" style="overflow-x:auto; margin-top:12px;"></div>
+                        <button class="btn--export btn--export-pdf" style="margin-top:auto;" onclick="exportPanelToPDF('toolkit-logic', 'Dijital_Lojik_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+
+                    <!-- PCB Trace Width Card -->
+                    <div class="panel-card toolkit-card" id="toolkit-pcb">
+                        <h3 class="toolkit-card__title">&#128421; PCB Yol Kalınlığı (IPC-2221)</h3>
+                        <div class="panel-field"><label class="panel-label">Akım (Amper)</label><input type="number" class="panel-input" id="pcb-current" value="1.0"></div>
+                        <div class="panel-field"><label class="panel-label">Bakır Kalınlığı (oz)</label><input type="number" class="panel-input" id="pcb-copper" value="1.0"></div>
+                        <button class="btn--panel-action btn--panel-action--wide" id="pcb-calc">Hesapla</button>
+                        <div class="panel-result" id="pcb-result">-</div>
+                        <button class="btn--export btn--export-pdf" style="margin-top:auto;" onclick="exportPanelToPDF('toolkit-pcb', 'PCB_Yol_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+
+                    <!-- 3D Print Cost Card -->
+                    <div class="panel-card toolkit-card" id="toolkit-3dprint">
+                        <h3 class="toolkit-card__title">&#128424; 3D Baskı Maliyeti</h3>
+                        <div class="panel-field"><label class="panel-label">Parça Ağırlığı (gram)</label><input type="number" class="panel-input" id="print-weight" value="50"></div>
+                        <div class="panel-field"><label class="panel-label">Filament Kg Fiyatı (TL)</label><input type="number" class="panel-input" id="print-price" value="600"></div>
+                        <button class="btn--panel-action btn--panel-action--wide" id="print-calc">Hesapla</button>
+                        <div class="panel-result" id="print-result">-</div>
+                        <button class="btn--export btn--export-pdf" style="margin-top:auto;" onclick="exportPanelToPDF('toolkit-3dprint', '3D_Baski_Maliyet_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== BOM TAB ==================== -->
+            <section class="workspace__panel" id="panel-bom">
+                <h2 class="panel-title" data-i18n="bomTitle">Proje Maliyeti (BOM)</h2>
+                <div class="info-banner" data-i18n="infoBOM">Malzeme listelerinizi oluşturun, maliyetleri hesaplayın ve projelerinizi kaydedin.</div>
+                
+                <div class="bom-layout">
+                    <div class="bom-sidebar">
+                        <h3 style="color:var(--neon-blue); margin-top:0; margin-bottom:15px; font-size:16px;">Kayıtlı Projeler</h3>
+                        <div class="bom-sidebar-actions">
+                            <input type="text" id="bom-project-name" placeholder="Proje Adı (Örn: Fırın Otomasyonu)" class="panel-input" style="margin-bottom:10px;">
+                            <button class="btn--panel-action btn--panel-action--wide" id="bom-save-btn">Projeyi Kaydet</button>
+                        </div>
+                        <ul id="bom-project-list" class="bom-project-list">
+                            <!-- saved projects injected here -->
+                        </ul>
+                    </div>
+                    
+                    <div class="bom-main">
+                        <div class="panel-card" id="bom-workspace" style="height: 100%; display: flex; flex-direction: column;">
+                            <div id="bom-table-container" style="flex:1; overflow-y:auto; margin-bottom:15px;">
+                                <div class="bom-header-row bom-header-row--large">
+                                    <span>Malzeme Adı</span><span>Adet</span><span>Birim Fiyat (TL)</span><span>Toplam</span><span></span>
+                                </div>
+                                <div id="bom-rows"></div>
+                            </div>
+                            <button class="btn--panel-action" id="bom-add-row" style="align-self:flex-start; margin-bottom:15px; padding:8px 24px; font-size:14px;">+ Satır Ekle</button>
+                            <div class="bom-total bom-total--large" id="bom-total">Toplam Proje Maliyeti: <strong>0.00 TL</strong></div>
+                            <button class="btn--export btn--export-pdf" style="margin-top:15px;" onclick="exportPanelToPDF('bom-workspace', 'BOM_Raporu.pdf')">Raporu İndir (PDF)</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== COMPLEX TAB ==================== -->
+            <section class="workspace__panel" id="panel-cmplx">
+                <h2 class="panel-title" data-i18n="cmplxTitle">Kompleks Sayı İşlemleri</h2>
+                <div class="info-banner" data-i18n="infoCmplx">Karmaşık sayı aritmetiği, paralel empedans, Euler/Kutupsal gösterim formülleri.</div>
+                <div class="panel-card">
+                    <div class="cmplx-workspace">
+                        <div class="cmplx-group">
+                            <label class="panel-label" data-i18n="complexZ1">Z₁ (Karmaşık Sayı)</label>
+                            <div class="cmplx-row">
+                                <input type="number" class="panel-input panel-input--sm" id="cmplx-a1" placeholder="Re" step="any"><span class="cmplx-sign">+</span><input type="number" class="panel-input panel-input--sm" id="cmplx-b1" placeholder="Im" step="any"><span class="cmplx-sign">i</span>
+                            </div>
+                        </div>
+                        <div class="cmplx-group">
+                            <label class="panel-label" data-i18n="complexZ2">Z₂ (Karmaşık Sayı)</label>
+                            <div class="cmplx-row">
+                                <input type="number" class="panel-input panel-input--sm" id="cmplx-a2" placeholder="Re" step="any"><span class="cmplx-sign">+</span><input type="number" class="panel-input panel-input--sm" id="cmplx-b2" placeholder="Im" step="any"><span class="cmplx-sign">i</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-field">
+                        <label class="panel-label" data-i18n="operation">İşlem</label>
+                        <select class="panel-select" id="cmplx-op">
+                            <option value="add">Z₁ + Z₂</option>
+                            <option value="sub">Z₁ − Z₂</option>
+                            <option value="mul">Z₁ × Z₂</option>
+                            <option value="div">Z₁ ÷ Z₂</option>
+                            <option value="parallel" data-i18n="opParallel">Z₁ ∥ Z₂ (Paralel Empedans)</option>
+                            <option value="mod">|Z₁| (Z1 Modül)</option>
+                            <option value="conj" data-i18n="opConj">Z₁* (Z1 Eşlenik)</option>
+                            <option value="mod2">|Z₂| (Z2 Modül)</option>
+                            <option value="conj2">Z₂* (Z2 Eşlenik)</option>
+                            <option value="polar" data-i18n="opPolar">Z1 Kutupsal (r∠θ)</option>
+                            <option value="euler" data-i18n="opEuler">Z1 Euler (A·e^iθ)</option>
+                        </select>
+                    </div>
+                    <button class="btn--panel-action btn--panel-action--wide" id="cmplx-calc" data-i18n="calcResult">Hesapla</button>
+                    <div class="panel-result" id="cmplx-result">—</div>
+                    <div class="action-bar" style="margin-top: 16px;">
+                        <button class="btn--export btn--export-pdf" onclick="exportPanelToPDF('panel-cmplx', 'Kompleks_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== CONV TAB (DYNAMIC) ==================== -->
+            <section class="workspace__panel" id="panel-conv">
+                <h2 class="panel-title" data-i18n="convTitle">Dinamik Birim Çevirici</h2>
+                <div class="info-banner" data-i18n="infoConv">Fiziksel büyüklüklerin birimlerini hızlı ve hassas şekilde çevirin.</div>
+                <div class="panel-card">
+                    <div class="conv-grid" id="conv-grid">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                    <div class="action-bar" style="margin-top: 16px;">
+                        <button class="btn--export btn--export-pdf" onclick="exportPanelToPDF('panel-conv', 'Birim_Cevirici_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== BASE-N TAB ==================== -->
+            <section class="workspace__panel" id="panel-base">
+                <h2 class="panel-title" data-i18n="baseTitle">Taban Dönüşümleri (BASE-N)</h2>
+                <div class="info-banner" data-i18n="infoBase">Sayı sistemleri arası otomatik çeviri, mantıksal (bit düzeyinde) operasyonlar.</div>
+                <div class="panel-card">
+                    <div class="base-display">
+                        <div class="base-row"><span class="base-label" data-i18n="baseDec">DEC (10'luk Taban)</span><span class="base-value" id="base-dec">0</span></div>
+                        <div class="base-row"><span class="base-label" data-i18n="baseHex">HEX (16'lık Taban)</span><span class="base-value" id="base-hex">0</span></div>
+                        <div class="base-row"><span class="base-label" data-i18n="baseOct">OCT (8'lik Taban)</span><span class="base-value" id="base-oct">0</span></div>
+                        <div class="base-row"><span class="base-label" data-i18n="baseBin">BIN (2'lik Taban)</span><span class="base-value" id="base-bin">0</span></div>
+                    </div>
+                    <div class="base-mode-btns">
+                        <button class="btn--base btn--base-active" data-base="dec">DEC</button>
+                        <button class="btn--base" data-base="hex">HEX</button>
+                        <button class="btn--base" data-base="oct">OCT</button>
+                        <button class="btn--base" data-base="bin">BIN</button>
+                    </div>
+                    <div class="panel-field">
+                        <label class="panel-label" data-i18n="inputValue">Değer Girin</label>
+                        <input type="text" class="panel-input" id="base-input" placeholder="0" autocomplete="off">
+                    </div>
+                    <h3 class="panel-subtitle" data-i18n="logicOps">Mantıksal Operatörler</h3>
+                    <div class="logic-row">
+                        <input type="number" class="panel-input panel-input--sm" id="logic-a" placeholder="A (Dec)">
+                        <select class="panel-select panel-input--sm" id="logic-op">
+                            <option value="and">AND</option><option value="or">OR</option><option value="xor">XOR</option>
+                            <option value="not">NOT (A)</option><option value="shl">SHL (A&lt;&lt;B)</option><option value="shr">SHR (A&gt;&gt;B)</option>
+                        </select>
+                        <input type="number" class="panel-input panel-input--sm" id="logic-b" placeholder="B (Dec)">
+                    </div>
+                    <button class="btn--panel-action btn--panel-action--wide" id="logic-calc" data-i18n="calcLogic">Hesapla</button>
+                    <div class="panel-result" id="logic-result">—</div>
+                    <div class="action-bar" style="margin-top: 16px;">
+                        <button class="btn--export btn--export-pdf" onclick="exportPanelToPDF('panel-base', 'BaseN_Raporu.pdf')">Raporu İndir (PDF)</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== CONST TAB ==================== -->
+            <section class="workspace__panel" id="panel-const">
+                <h2 class="panel-title" data-i18n="constTitle">Bilimsel Sabitler</h2>
+                <div class="info-banner" data-i18n="infoConst">Fiziksel, kimyasal ve kendi belirlediğiniz referans sabitlere tek tıkla erişin.</div>
+                <div class="panel-card">
+                    <!-- Add Custom Constant -->
+                    <div class="custom-const-form">
+                        <h3 class="panel-subtitle">Kendi Sabitini Ekle</h3>
+                        <div class="action-bar">
+                            <input type="text" class="panel-input panel-input--sm" id="custom-const-name" placeholder="Sabit Adı (örn: Benim Kütlem)">
+                            <input type="text" class="panel-input panel-input--sm" id="custom-const-sym" placeholder="Sembol (örn: m1)">
+                            <input type="number" class="panel-input panel-input--sm" id="custom-const-val" placeholder="Değer (örn: 75)" step="any">
+                            <input type="text" class="panel-input panel-input--sm" id="custom-const-unit" placeholder="Birim (örn: kg)">
+                            <button class="btn--panel-action" id="custom-const-add">Ekle (+)</button>
+                        </div>
+                    </div>
+                    <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+                    
+                    <div class="panel-field">
+                        <input type="text" class="panel-input" id="const-search" data-i18n-ph="constSearchPh" placeholder="Sabit ara (örn: Planck)...">
+                    </div>
+                    <p class="const-hint" data-i18n="constHint">Ana hesap makinesine eklemek için sabite tıklayın</p>
+                    <div class="const-list" id="const-list"></div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Code Export Modal -->
+    <div id="code-export-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:linear-gradient(145deg,#1a1a2e,#0f0f1e); border:1px solid rgba(0,243,255,0.2); border-radius:16px; padding:28px; width:min(700px,94vw); max-height:85vh; overflow-y:auto; box-shadow:0 0 60px rgba(0,243,255,0.1);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="color:#00f3ff; margin:0; font-size:18px;">&#60;/&#62; Koda Çevir</h3>
+                <button id="code-modal-close" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:8px; padding:6px 14px; cursor:pointer; font-size:14px;">✕ Kapat</button>
+            </div>
+            <div style="margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="color:#a0a0c0; font-size:13px; font-weight:600;">🔵 Python</span>
+                    <button class="btn--copy-code" data-target="code-python" style="background:rgba(0,243,255,0.08); border:1px solid rgba(0,243,255,0.3); color:#00f3ff; border-radius:6px; padding:4px 12px; cursor:pointer; font-size:12px;">📋 Kopyala</button>
+                </div>
+                <pre id="code-python" style="background:#0d0d1a; border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:16px; font-size:13px; color:#c5f0a4; white-space:pre-wrap; margin:0; font-family:'Courier New',monospace;"></pre>
+            </div>
+            <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="color:#a0a0c0; font-size:13px; font-weight:600;">🟠 C++ / Arduino</span>
+                    <button class="btn--copy-code" data-target="code-cpp" style="background:rgba(255,152,0,0.08); border:1px solid rgba(255,152,0,0.3); color:#ff9800; border-radius:6px; padding:4px 12px; cursor:pointer; font-size:12px;">📋 Kopyala</button>
+                </div>
+                <pre id="code-cpp" style="background:#0d0d1a; border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:16px; font-size:13px; color:#ffd580; white-space:pre-wrap; margin:0; font-family:'Courier New',monospace;"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://unpkg.com/d3@7"></script>
+    <script src="https://unpkg.com/function-plot@1/dist/function-plot.js"></script>
+    <!-- html2pdf for visual PDF exporting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- SheetJS for raw matrix/equation data export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
