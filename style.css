@@ -1424,60 +1424,7 @@ path.domain, .origin {
 /* ============================================================
    RESPONSIVE — TABLET & SMALL DESKTOP (max-width: 900px)
    ============================================================ */
-@media (max-width: 900px) {
-  .sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
 
-  .sidebar--open {
-    transform: translateX(0);
-  }
-
-  /* Dark overlay when sidebar is open */
-  .sidebar--open::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: var(--sidebar-width);
-    width: calc(100vw - var(--sidebar-width));
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9;
-  }
-
-  .mobile-menu-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .workspace {
-    margin-left: 0;
-    padding: 16px;
-    padding-top: 60px;
-  }
-
-  .calc-grids {
-    grid-template-columns: 1fr;
-  }
-
-  .macro-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .matrix-workspace {
-    grid-template-columns: 1fr;
-  }
-
-  .cmplx-workspace {
-    grid-template-columns: 1fr;
-  }
-
-  .conv-grid {
-    grid-template-columns: 1fr;
-  }
-}
 
 /* ============================================================
    RESPONSIVE — MOBILE (max-width: 600px)
@@ -1976,6 +1923,28 @@ path.domain, .origin {
   .conv-row input, .conv-row select {
     width: 100%;
     box-sizing: border-box;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE — TABLET (769px - 1024px)
+   ============================================================ */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  
+  .sidebar__logo {
+    font-size: 16px;
+  }
+
+  .sidebar__footer {
+    margin-top: auto;
+    flex-shrink: 0;
+    padding-bottom: 30px;
   }
 }
 
