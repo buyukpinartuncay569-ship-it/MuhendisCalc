@@ -1817,3 +1817,153 @@ path.domain, .origin {
   color: #ff6b6b;
 }
 
+/* ============================================================
+   RESPONSIVE — MOBILE (max-width: 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    width: 100vw;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+    z-index: 1000;
+  }
+
+  .sidebar--open {
+    transform: translateX(0);
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    top: 10px;
+    left: 10px;
+    z-index: 1001;
+  }
+
+  .workspace {
+    margin-left: 0;
+    padding: 10px;
+    padding-top: 60px; /* Space for hamburger */
+  }
+
+  /* Full width keypad */
+  .calculator {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 12px;
+  }
+
+  .calculator__keypad {
+    grid-template-columns: repeat(4, 1fr);
+    width: 100%;
+    gap: 6px;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .btn {
+    padding: 14px 6px;
+    font-size: 16px;
+  }
+
+  .btn--sci {
+    font-size: 12px;
+    padding: 12px 4px;
+  }
+
+  .btn-grid--sci {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  /* Font size adjustments */
+  .display {
+    padding: 12px;
+    min-height: 100px;
+  }
+
+  .display__result {
+    font-size: 26px;
+    word-break: break-all;
+  }
+
+  .display__result .katex {
+    font-size: 26px !important;
+  }
+
+  .panel-card {
+    padding: 12px;
+  }
+
+  .panel-title {
+    font-size: 22px;
+  }
+
+  /* Prevent overflow on BOM and other modules */
+  .bom-layout {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .bom-sidebar {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+  }
+
+  .bom-header-row, .bom-header-row--large {
+    display: none;
+  }
+
+  .bom-row, .bom-row--large {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .bom-row input, .bom-row--large input {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 14px;
+  }
+
+  .bom-row-total {
+    text-align: left;
+    font-size: 18px;
+    margin-top: 5px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .bom-row-del {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .conv-row {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .conv-row input, .conv-row select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
