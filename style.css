@@ -1829,6 +1829,18 @@ path.domain, .origin {
   .sidebar {
     transform: translateX(-100%);
     z-index: 1000;
+    height: 100dvh;
+    overflow-y: auto;
+  }
+
+  .sidebar__header {
+    padding-left: 60px;
+  }
+
+  .sidebar__footer {
+    margin-top: auto;
+    flex-shrink: 0;
+    padding-bottom: 30px;
   }
 
   .sidebar--open {
